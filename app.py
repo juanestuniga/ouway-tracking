@@ -20,7 +20,7 @@ drivers_collection = db['drivers']
 
 @app.route('/')
 def home():
-  return render_template('home.html')
+  return render_template('index.html')
 
 @app.route('/get_drivers', methods=['GET'])
 def get_drivers():
@@ -57,6 +57,9 @@ def add_driver():
 def driver_added():
   return render_template('driver.html')
 
+@app.route('/add_package')
+def add_package_form():
+  return render_template('form.html')
 
 @app.route('/add_package', methods=['POST'])
 def add_package():
