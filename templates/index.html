@@ -56,10 +56,10 @@
 </head>
 <body>
   <div id="logo"></div>
-  <div id="progress-bar">
+  <!-- <div id="progress-bar">
     <div id="progress"></div>
-    <div id="progress-text">
-      In Transit
+    <div id="progress-text"> -->
+      <!-- In Transit -->
     </div>
   </div>
   <div id="map"></div>
@@ -104,18 +104,18 @@
               marker.setPosition(location);
               map.setCenter(location);
 
-              // Update the progress bar and text
-              var progress = document.getElementById('progress');
-              var progressText = document.getElementById('progress-text');
-              if (location) {
-                progress.style.width = '100%';
-                progressText.innerHTML = 'Delivered';
-              } else if (progress.style.width === '50%') {
-                progressText.innerHTML = 'In Transit';
-              } else {
-                progress.style.width = '50%';
-                progressText.innerHTML = 'Not Yet In Transit';
-              }
+              // // Update the progress bar and text
+              // var progress = document.getElementById('progress');
+              // var progressText = document.getElementById('progress-text');
+              // if (location) {
+              //   progress.style.width = '100%';
+              //   progressText.innerHTML = 'Delivered';
+              // } else if (progress.style.width === '50%') {
+              //   progressText.innerHTML = 'In Transit';
+              // } else {
+              //   progress.style.width = '50%';
+              //   progressText.innerHTML = 'Not Yet In Transit';
+              // }
             }
           };
           xhr.send(JSON.stringify({'package_id': packageId}));  // Replace with the actual package ID
