@@ -1,0 +1,32 @@
+<style>
+    form {
+      width: 50%;
+      margin: 0 auto;
+      text-align: center;
+    }
+  
+    input[type="text"] {
+      width: 70%;
+      height: 30px;
+      border: 1px solid gray;
+      border-radius: 5px;
+      margin: 10px 0;
+      padding: 0 10px;
+    }
+  
+    input[type="submit"] {
+      width: 20%;
+      height: 35px;
+      border: none;
+      border-radius: 5px;
+      background-color: blue;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+  <form action="http://yourserver.com/submit_package" method="post">
+    <p>Package ID: <input type="text" name="package_id"></p>
+    <p>Destination: <input type="text" name="destination"></p>
+    <input type="submit" value="Submit">
+  </form>

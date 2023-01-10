@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Package Tracking</title>
+  
+  <script src="https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}"></script>
+
+  <style>
+      #map {
+        width: 500px;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        bottom: 10%;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+          
+      #progress-bar {
+        width: 500px;
+        height: 100px;
+        background-color: lightgray;
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 20%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      #progress {
+        width: 90%;
+        height: 100%;
+        background-color: green;
+        transition: width 0.5s;
+      }
+      #logo {
+        width: 100px;
+        height: 100px;
+        background-image: url('https://cdn.shopify.com/s/files/1/2406/5155/files/OUWAY_LOGO.png?v=1673126739');
+        background-size: cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+  </style>
+</head>
+<body>
+  <div id="logo"></div>
+  <div id="progress-bar">
+    <div id="progress"></div>
+    <div id="progress-text">
+      In Transit
+    </div>
+  </div>
+  <div id="map"></div>
+  <script>
+      const dotenv = require('dotenv');
+      dotenv.config();
+      var googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
+      function initMap() {
+       // Make a request to the server to get the package information
+        var packageUrl = process.env.SERVER_URL + '/get_package/' + packageId;
+        var packageInfo = null;
+        fetch(packageUrl)
+            .then(response => response.json())
+            .then(data => {
+                packageInfo = data;
+                // Initialize the map with the destination coordinates
+                var map = new google.maps.Map(document.getElementById('map'), {
+                    zoom: 12,
+                    center: {lat: packageInfo.destination_lat, lng: packageInfo.destination_lng}
+                });
+                // Create a marker for the destination
+                var destinationMarker = new google.maps.Marker({
+                    position: {lat: packageInfo.destination_lat, lng: packageInfo.destination_lng},
+                    map: map,
+                    title: 'Destination'
+                });
+              });
+        // Add a marker for the package's current location
+        var marker = new google.maps.Marker({
+          map: map
+        });
+        
+        // Update the marker position and map center every 30 seconds (adjust the interval as needed)
+        setInterval(function() {
+          // Make a request to the server to get the current location of the package
+          var xhr = new XMLHttpRequest();
+          xhr.open('POST', process.env.SERVER_URL + '/get_location', true);
+          xhr.setRequestHeader('Content-Type', 'application/json');
+          xhr.onload = function() {
+            if (xhr.status === 200) {
+              var location = JSON.parse(xhr.responseText)['location'];
+              marker.setPosition(location);
+              map.setCenter(location);
+
+              // Update the progress bar and text
+              var progress = document.getElementById('progress');
+              var progressText = document.getElementById('progress-text');
+              if (location) {
+                progress.style.width = '100%';
+                progressText.innerHTML = 'Delivered';
+              } else if (progress.style.width === '50%') {
+                progressText.innerHTML = 'In Transit';
+              } else {
+                progress.style.width = '50%';
+                progressText.innerHTML = 'Not Yet In Transit';
+              }
+            }
+          };
+          xhr.send(JSON.stringify({'package_id': packageId}));  // Replace with the actual package ID
+        }, 30000);
+      }
+
+  </script> 
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&callback=initMap"></script>
+</body>
+</html>
