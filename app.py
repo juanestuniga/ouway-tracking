@@ -36,7 +36,7 @@ def add_driver_form():
 
 @app.route('/add_driver', methods=['POST'])
 def add_driver():
-  # Get the driver's information from the form
+  # Get the driver's information from the form html
   name = request.form['name']
   email = request.form['email']
   phone = request.form['phone']
