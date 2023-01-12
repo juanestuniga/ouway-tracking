@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 import pymongo
 import googlemaps
+from geopy.geocoders import Nominatim
 
 app = Flask(__name__)
 
@@ -68,15 +69,21 @@ def add_package_form():
 def add_package():
   # Get the package information from the form
   package_id = request.form['package_id']
-  location = request.form['location']
+  destination = request.form['destination']
   # Add any other relevant details here
-
+  # Use geopy to get the latitude and longitude of the address
+  geolocator = Nominatim(user_agent="geoapiExercises")
+  location = geolocator.geocode(destination)
   # Save the package information in the database
   package = {
     'package_id': package_id,
-    'location': location,
-    # Add any other relevant details here
+    'destination': destination,
+    'location': {
+            'type': 'Point',
+            'coordinates': [location.longitude, location.latitude]
+    },
   }
+  
   packages_collection.insert_one(package)
 
   return redirect(url_for('track_package', package_id=package_id))
@@ -92,34 +99,15 @@ def assign_package():
   return jsonify({'status': 'success'})
 
 
-# Function to convert an address to latitude and longitude
-def address_to_latlng(address):
-    try:
-        # Make a geocoding API request
-        result = gmaps.geocode(address)
-        # Extract the latitude and longitude from the API response
-        latlng = result[0]['geometry']['location']
-        return latlng
-    except:
-        return None
-
-@app.route('/track_package/<package_id>')
+@app.route('/packages/<package_id>')
 def track_package(package_id):
-    # Get the package information from the database
-    package = packages_collection.find_one({'package_id': package_id})
+  # Get the package information from the database
+  package = packages_collection.find_one({'package_id': package_id})
 
-    # Get the current location of the package
-    location = locations_collection.find_one({'package_id': package_id})['location']
+  # Get the current location of the package
+  location = locations_collection.find_one({'package_id': package_id})['location']
 
-    # Convert the location to latitude and longitude
-    latlng = address_to_latlng(location)
-
-    if latlng:
-        # Pass the latitude and longitude to the template
-        return render_template('index.html', package=package, lat=latlng['lat'], lng=latlng['lng'])
-    else:
-        # Handle the case where the location couldn't be converted
-        return render_template('error.html', message='Could not convert location to latitude and longitude')
+  return render_template('index.html', package=package, location=location)
 
 @app.route('/update_location', methods=['POST'])
 def update_location():
