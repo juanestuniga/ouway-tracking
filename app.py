@@ -36,7 +36,7 @@ def add_driver_form():
 
 @app.route('/add_driver', methods=['POST'])
 def add_driver():
-  # Get the driver's information from the form html
+  # Get the driver's information from the form
   name = request.form['name']
   email = request.form['email']
   phone = request.form['phone']
@@ -65,18 +65,18 @@ def add_package_form():
 def add_package():
   # Get the package information from the form
   package_id = request.form['package_id']
-  destination = request.form['destination']
+  location = request.form['location']
   # Add any other relevant details here
 
   # Save the package information in the database
   package = {
     'package_id': package_id,
-    'destination': destination,
+    'location': location,
     # Add any other relevant details here
   }
   packages_collection.insert_one(package)
 
-  return redirect(url_for('index', package_id=package_id))
+  return redirect(url_for('track_package', package_id=package_id))
 
 @app.route('/assign_package', methods=['POST'])
 def assign_package():
@@ -89,7 +89,7 @@ def assign_package():
   return jsonify({'status': 'success'})
 
 
-@app.route('/index/<package_id>')
+@app.route('/track_package/<package_id>')
 def track_package(package_id):
   # Get the package information from the database
   package = packages_collection.find_one({'package_id': package_id})
