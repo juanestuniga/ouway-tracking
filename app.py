@@ -76,7 +76,7 @@ def add_package():
   }
   packages_collection.insert_one(package)
 
-  return redirect(url_for('track_package', package_id=package_id))
+  return redirect(url_for('index', package_id=package_id))
 
 @app.route('/assign_package', methods=['POST'])
 def assign_package():
@@ -89,7 +89,7 @@ def assign_package():
   return jsonify({'status': 'success'})
 
 
-@app.route('/track_package/<package_id>')
+@app.route('/index/<package_id>')
 def track_package(package_id):
   # Get the package information from the database
   package = packages_collection.find_one({'package_id': package_id})
