@@ -89,7 +89,7 @@ def assign_package():
   return jsonify({'status': 'success'})
 
 
-@app.route('/get_package/<package_id>')
+@app.route('/packages/<package_id>')
 def track_package(package_id):
   # Get the package information from the database
   package = packages_collection.find_one({'package_id': package_id})
