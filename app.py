@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 import pymongo
+import googlemaps
 
 app = Flask(__name__)
 
@@ -17,6 +18,8 @@ packages_collection = db['packages']
 locations_collection = db['locations']
 drivers_collection = db['drivers']
 
+# Initialize the Google Maps API client
+gmaps = googlemaps.Client(key=os.environ.get('GOOGLE_MAPS_API_KEY'))
 
 @app.route('/')
 def home():
@@ -89,15 +92,34 @@ def assign_package():
   return jsonify({'status': 'success'})
 
 
-@app.route('/packages/<package_id>')
+# Function to convert an address to latitude and longitude
+def address_to_latlng(address):
+    try:
+        # Make a geocoding API request
+        result = gmaps.geocode(address)
+        # Extract the latitude and longitude from the API response
+        latlng = result[0]['geometry']['location']
+        return latlng
+    except:
+        return None
+
+@app.route('/track_package/<package_id>')
 def track_package(package_id):
-  # Get the package information from the database
-  package = packages_collection.find_one({'package_id': package_id})
+    # Get the package information from the database
+    package = packages_collection.find_one({'package_id': package_id})
 
-  # Get the current location of the package
-  location = locations_collection.find_one({'package_id': package_id})['location']
+    # Get the current location of the package
+    location = locations_collection.find_one({'package_id': package_id})['location']
 
-  return render_template('index.html', package=package, location=location)
+    # Convert the location to latitude and longitude
+    latlng = address_to_latlng(location)
+
+    if latlng:
+        # Pass the latitude and longitude to the template
+        return render_template('index.html', package=package, lat=latlng['lat'], lng=latlng['lng'])
+    else:
+        # Handle the case where the location couldn't be converted
+        return render_template('error.html', message='Could not convert location to latitude and longitude')
 
 @app.route('/update_location', methods=['POST'])
 def update_location():
